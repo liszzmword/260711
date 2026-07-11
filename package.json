@@ -1,0 +1,9 @@
+{
+  "name": "lotto-saju",
+  "version": "1.0.0",
+  "private": true,
+  "description": "로또 번호 추첨기 + AI 사주 기반 번호 추천",
+  "engines": {
+    "node": ">=18"
+  }
+}

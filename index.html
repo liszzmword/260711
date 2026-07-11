@@ -33,6 +33,7 @@
     --accent-teal: #5db8a6;
     --accent-amber: #e8a55a;
     --success: #5db872;
+    --error: #c64545;
 
     /* typography */
     --font-display: "Cormorant Garamond", "Tiempos Headline", Garamond, serif;
@@ -208,7 +209,7 @@
   .b4 { background: var(--muted); }
   .b5 { background: var(--success); }
 
-  button#drawBtn {
+  .btn-primary {
     display: block;
     width: 100%;
     background: var(--primary);
@@ -224,11 +225,146 @@
     transition: background-color 0.15s;
   }
 
-  button#drawBtn:hover { background: var(--primary-active); }
-  button#drawBtn:disabled {
+  .btn-primary:hover { background: var(--primary-active); }
+  .btn-primary:disabled {
     background: var(--primary-disabled);
     color: var(--muted);
     cursor: default;
+  }
+
+  /* saju form card — light cream, alternates against the dark draw-card */
+  .saju-card {
+    background: var(--surface-card);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xl);
+    margin-bottom: var(--sp-lg);
+  }
+
+  .saju-card h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 24px;
+    letter-spacing: -0.3px;
+    margin: 0 0 4px;
+    color: var(--ink);
+  }
+
+  .saju-card .sub {
+    margin: 0 0 var(--sp-lg);
+    font-size: 14px;
+  }
+
+  .field { margin-bottom: var(--sp-md); }
+
+  .field label {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .field input[type="date"],
+  .field input[type="time"],
+  .field select {
+    width: 100%;
+    background: var(--canvas);
+    color: var(--ink);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: 10px 14px;
+    height: 40px;
+    font-family: var(--font-body);
+    font-size: 14px;
+  }
+
+  .field input:disabled { color: var(--muted-soft); }
+
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    margin: -6px 0 var(--sp-md);
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-md);
+  }
+
+  .saju-disclaimer {
+    font-size: 12px;
+    color: var(--muted-soft);
+    margin-top: var(--sp-sm);
+    text-align: center;
+  }
+
+  .saju-result { margin-top: var(--sp-lg); }
+
+  .saju-loading, .saju-error {
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 12px 0;
+  }
+
+  .saju-loading { color: var(--muted); }
+  .saju-error { color: var(--error); }
+
+  .saju-summary {
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: var(--sp-lg);
+  }
+
+  .saju-summary-title {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .saju-summary p {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--body);
+    margin: 0 0 8px;
+  }
+
+  .saju-summary p:last-child { margin-bottom: 0; }
+
+  .saju-numbers-card {
+    background: var(--surface-dark);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xl);
+    margin-top: var(--sp-md);
+  }
+
+  .history-tag {
+    background: var(--accent-teal);
+    color: var(--on-primary);
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: var(--r-pill);
+    margin-right: 4px;
+    flex-shrink: 0;
   }
 
   .history {
@@ -281,7 +417,53 @@
       <div class="plus" id="plus">+</div>
       <div class="bonus-row" id="bonusRow"></div>
       <div class="bonus-label" id="bonusLabel">보너스 번호</div>
-      <button id="drawBtn">번호 추첨하기</button>
+      <button id="drawBtn" class="btn-primary">번호 추첨하기</button>
+    </div>
+
+    <div class="saju-card">
+      <span class="eyebrow">AI Saju</span>
+      <h2>사주로 번호 추천받기</h2>
+      <p class="sub">생년월일과 태어난 시간을 입력하면 AI가 사주를 풀이해 번호를 추천해드려요.</p>
+
+      <form id="sajuForm">
+        <div class="two-col">
+          <div class="field">
+            <label for="birthDate">생년월일</label>
+            <input type="date" id="birthDate" required>
+          </div>
+          <div class="field">
+            <label for="birthTime">태어난 시간</label>
+            <input type="time" id="birthTime">
+          </div>
+        </div>
+
+        <label class="checkbox-row">
+          <input type="checkbox" id="timeUnknown"> 태어난 시간을 몰라요
+        </label>
+
+        <div class="two-col">
+          <div class="field">
+            <label for="calendarType">양력 / 음력</label>
+            <select id="calendarType">
+              <option value="solar">양력</option>
+              <option value="lunar">음력</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="gender">성별 (선택)</label>
+            <select id="gender">
+              <option value="">선택 안 함</option>
+              <option value="male">남성</option>
+              <option value="female">여성</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" id="sajuBtn" class="btn-primary">사주 분석하고 번호 받기</button>
+        <p class="saju-disclaimer">⚠ AI가 추정한 사주 풀이로, 재미로 즐기는 콘텐츠입니다.</p>
+      </form>
+
+      <div class="saju-result" id="sajuResult"></div>
     </div>
 
     <div class="history" id="history"></div>
@@ -373,11 +555,12 @@
     drawing = false;
   }
 
-  function addHistory(numbers, bonus) {
+  function addHistory(numbers, bonus, source) {
     round++;
     const row = document.createElement('div');
     row.className = 'history-item';
-    row.innerHTML = `<span class="idx">#${round}</span>` +
+    const tag = source === 'ai' ? '<span class="history-tag">AI 사주</span>' : '';
+    row.innerHTML = `<span class="idx">#${round}</span>` + tag +
       numbers.map(n => `<span class="mini ${colorClass(n)}">${n}</span>`).join('') +
       `<span style="color:var(--muted-soft);font-size:12px;margin:0 2px;">+</span>` +
       `<span class="mini ${colorClass(bonus)}" style="box-shadow:0 0 0 2px var(--canvas),0 0 0 3px var(--muted-soft);">${bonus}</span>`;
@@ -387,6 +570,95 @@
   drawBtn.addEventListener('click', playDraw);
 
   playDraw();
+
+  // ---- AI 사주 분석 & 추천 ----
+  const sajuForm = document.getElementById('sajuForm');
+  const sajuBtn = document.getElementById('sajuBtn');
+  const sajuResult = document.getElementById('sajuResult');
+  const timeUnknown = document.getElementById('timeUnknown');
+  const birthTimeInput = document.getElementById('birthTime');
+
+  timeUnknown.addEventListener('change', () => {
+    birthTimeInput.disabled = timeUnknown.checked;
+    if (timeUnknown.checked) birthTimeInput.value = '';
+  });
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : str;
+    return div.innerHTML;
+  }
+
+  function isValidLottoSet(mainNumbers, bonusNumber) {
+    if (!Array.isArray(mainNumbers) || mainNumbers.length !== 6) return false;
+    const inRange = n => Number.isInteger(n) && n >= 1 && n <= 45;
+    if (!mainNumbers.every(inRange) || !inRange(bonusNumber)) return false;
+    const unique = new Set(mainNumbers);
+    if (unique.size !== 6 || unique.has(bonusNumber)) return false;
+    return true;
+  }
+
+  async function renderSajuResult(data) {
+    sajuResult.innerHTML = `
+      <div class="saju-summary">
+        <div class="saju-summary-title">사주 풀이</div>
+        <p>${escapeHtml(data.summary)}</p>
+        ${data.reasoning ? `<p>${escapeHtml(data.reasoning)}</p>` : ''}
+      </div>
+      <div class="saju-numbers-card">
+        <div class="draw-label">사주 기반 추천 번호</div>
+        <div class="balls" id="sajuBalls"></div>
+        <div class="plus" id="sajuPlus" style="visibility:visible;">+</div>
+        <div class="bonus-row" id="sajuBonusRow"></div>
+        <div class="bonus-label show">보너스 번호</div>
+      </div>
+    `;
+
+    const sajuBallsEl = document.getElementById('sajuBalls');
+    const sajuBonusRowEl = document.getElementById('sajuBonusRow');
+
+    const slots = data.mainNumbers.map(() => createEmptySlot(sajuBallsEl));
+    for (let i = 0; i < slots.length; i++) {
+      await rollBall(slots[i], data.mainNumbers[i], false);
+    }
+    const bonusSlot = createEmptySlot(sajuBonusRowEl);
+    await rollBall(bonusSlot, data.bonusNumber, true);
+
+    addHistory(data.mainNumbers.slice().sort((a, b) => a - b), data.bonusNumber, 'ai');
+  }
+
+  sajuForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const birthDate = document.getElementById('birthDate').value;
+    if (!birthDate) return;
+    const birthTime = timeUnknown.checked ? null : (birthTimeInput.value || null);
+    const calendarType = document.getElementById('calendarType').value;
+    const gender = document.getElementById('gender').value || null;
+
+    sajuBtn.disabled = true;
+    sajuBtn.textContent = '사주 분석 중...';
+    sajuResult.innerHTML = `<div class="saju-loading">AI가 사주를 풀이하고 있어요...</div>`;
+
+    try {
+      const res = await fetch('/api/saju', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ birthDate, birthTime, calendarType, gender })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '분석에 실패했어요.');
+      if (!isValidLottoSet(data.mainNumbers, data.bonusNumber)) {
+        throw new Error('AI 응답을 해석하지 못했어요. 다시 시도해주세요.');
+      }
+      await renderSajuResult(data);
+    } catch (err) {
+      sajuResult.innerHTML = `<div class="saju-error">${escapeHtml(err.message || '오류가 발생했어요. 잠시 후 다시 시도해주세요.')}</div>`;
+    } finally {
+      sajuBtn.disabled = false;
+      sajuBtn.textContent = '사주 분석하고 번호 받기';
+    }
+  });
 </script>
 </body>
 </html>
