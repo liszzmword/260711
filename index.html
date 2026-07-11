@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>로또 번호 추첨기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* colors */
+    --primary: #cc785c;
+    --primary-active: #a9583e;
+    --primary-disabled: #e6dfd8;
+    --ink: #141413;
+    --body: #3d3d3a;
+    --body-strong: #252523;
+    --muted: #6c6a64;
+    --muted-soft: #8e8b82;
+    --hairline: #e6dfd8;
+    --hairline-soft: #ebe6df;
+    --canvas: #faf9f5;
+    --surface-soft: #f5f0e8;
+    --surface-card: #efe9de;
+    --surface-cream-strong: #e8e0d2;
+    --surface-dark: #181715;
+    --surface-dark-elevated: #252320;
+    --surface-dark-soft: #1f1e1b;
+    --on-primary: #ffffff;
+    --on-dark: #faf9f5;
+    --on-dark-soft: #a09d96;
+    --accent-teal: #5db8a6;
+    --accent-amber: #e8a55a;
+    --success: #5db872;
+
+    /* typography */
+    --font-display: "Cormorant Garamond", "Tiempos Headline", Garamond, serif;
+    --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    /* radius */
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-pill: 9999px;
+
+    /* spacing */
+    --sp-xs: 8px;
+    --sp-sm: 12px;
+    --sp-md: 16px;
+    --sp-lg: 24px;
+    --sp-xl: 32px;
+    --sp-xxl: 48px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--sp-lg);
+    font-family: var(--font-body);
+    background: var(--canvas);
+    color: var(--ink);
+  }
+
+  .page {
+    width: 460px;
+    max-width: 100%;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface-card);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: var(--r-pill);
+    margin-bottom: var(--sp-md);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 40px;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    margin: 0 0 8px;
+    color: var(--ink);
+  }
+
+  p.sub {
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--body);
+    margin: 0 0 var(--sp-xl);
+  }
+
+  /* dark product-mockup card housing the draw */
+  .draw-card {
+    background: var(--surface-dark);
+    border-radius: var(--r-lg);
+    padding: var(--sp-xl);
+    margin-bottom: var(--sp-lg);
+  }
+
+  .draw-label {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--on-dark-soft);
+    margin-bottom: var(--sp-md);
+  }
+
+  .balls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    min-height: 56px;
+    margin-bottom: var(--sp-md);
+  }
+
+  .plus {
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: var(--on-dark-soft);
+    visibility: hidden;
+  }
+
+  .bonus-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 56px;
+    margin-bottom: var(--sp-xs);
+  }
+
+  .bonus-label {
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--on-dark-soft);
+    margin-bottom: var(--sp-xl);
+    visibility: hidden;
+  }
+
+  .bonus-label.show { visibility: visible; }
+
+  .ball {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--r-pill);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--on-primary);
+    background: var(--surface-dark-elevated);
+    border: 1px dashed var(--on-dark-soft);
+  }
+
+  .ball.rolling {
+    border: none;
+    animation: shake 0.09s linear infinite;
+  }
+
+  .ball.settle {
+    border: none;
+    animation: pop 0.32s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  .ball.bonus-ring {
+    box-shadow: 0 0 0 3px var(--surface-dark), 0 0 0 5px var(--on-dark-soft);
+  }
+
+  @keyframes pop {
+    from { transform: scale(1.25); }
+    to { transform: scale(1); }
+  }
+
+  @keyframes shake {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+    100% { transform: translateY(0); }
+  }
+
+  .b1 { background: var(--primary); }
+  .b2 { background: var(--accent-teal); }
+  .b3 { background: var(--accent-amber); }
+  .b4 { background: var(--muted); }
+  .b5 { background: var(--success); }
+
+  button#drawBtn {
+    display: block;
+    width: 100%;
+    background: var(--primary);
+    color: var(--on-primary);
+    border: none;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 12px 20px;
+    height: 44px;
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: background-color 0.15s;
+  }
+
+  button#drawBtn:hover { background: var(--primary-active); }
+  button#drawBtn:disabled {
+    background: var(--primary-disabled);
+    color: var(--muted);
+    cursor: default;
+  }
+
+  .history {
+    border-top: 1px solid var(--hairline);
+    margin-top: var(--sp-lg);
+    padding-top: var(--sp-sm);
+    max-height: 180px;
+    overflow-y: auto;
+  }
+
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--hairline-soft);
+  }
+
+  .history-item .idx {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--muted-soft);
+    width: 26px;
+    flex-shrink: 0;
+  }
+
+  .mini {
+    width: 22px;
+    height: 22px;
+    border-radius: var(--r-pill);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--on-primary);
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <span class="eyebrow">Lotto Draw</span>
+    <h1>로또 번호 추첨기</h1>
+    <p class="sub">1부터 45까지, 서로 다른 6개의 번호를 뽑아드려요.</p>
+
+    <div class="draw-card">
+      <div class="draw-label">이번 회차 추첨 결과</div>
+      <div class="balls" id="balls"></div>
+      <div class="plus" id="plus">+</div>
+      <div class="bonus-row" id="bonusRow"></div>
+      <div class="bonus-label" id="bonusLabel">보너스 번호</div>
+      <button id="drawBtn">번호 추첨하기</button>
+    </div>
+
+    <div class="history" id="history"></div>
+  </div>
+
+<script>
+  const ballsEl = document.getElementById('balls');
+  const plusEl = document.getElementById('plus');
+  const bonusRowEl = document.getElementById('bonusRow');
+  const bonusLabelEl = document.getElementById('bonusLabel');
+  const drawBtn = document.getElementById('drawBtn');
+  const historyEl = document.getElementById('history');
+  let round = 0;
+  let drawing = false;
+
+  function colorClass(n) {
+    if (n <= 10) return 'b1';
+    if (n <= 20) return 'b2';
+    if (n <= 30) return 'b3';
+    if (n <= 40) return 'b4';
+    return 'b5';
+  }
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // 7개(본번호 6 + 보너스 1)를 한 번의 추첨 풀에서 서로 다르게 뽑는다
+  function drawSeven() {
+    const pool = Array.from({ length: 45 }, (_, i) => i + 1);
+    const picked = [];
+    for (let i = 0; i < 7; i++) {
+      const idx = Math.floor(Math.random() * pool.length);
+      picked.push(pool[idx]);
+      pool.splice(idx, 1);
+    }
+    return { main: picked.slice(0, 6), bonus: picked[6] };
+  }
+
+  function createEmptySlot(container) {
+    const div = document.createElement('div');
+    div.className = 'ball';
+    container.appendChild(div);
+    return div;
+  }
+
+  // 추첨 기계처럼 숫자가 빠르게 굴러가다 서서히 멈추며 확정된다
+  async function rollBall(el, finalNum, isBonus) {
+    el.classList.add('rolling');
+    const spins = 14;
+    for (let i = 0; i < spins; i++) {
+      const r = Math.floor(Math.random() * 45) + 1;
+      el.textContent = r;
+      el.className = `ball rolling ${colorClass(r)}${isBonus ? ' bonus-ring' : ''}`;
+      await sleep(50 + i * 8); // 점점 느려지며 멈추는 느낌
+    }
+    el.textContent = finalNum;
+    el.className = `ball settle ${colorClass(finalNum)}${isBonus ? ' bonus-ring' : ''}`;
+    await sleep(180);
+  }
+
+  async function playDraw() {
+    if (drawing) return;
+    drawing = true;
+    drawBtn.disabled = true;
+    drawBtn.textContent = '추첨 중...';
+
+    ballsEl.innerHTML = '';
+    bonusRowEl.innerHTML = '';
+    plusEl.style.visibility = 'hidden';
+    bonusLabelEl.classList.remove('show');
+
+    const { main, bonus } = drawSeven();
+
+    const slots = main.map(() => createEmptySlot(ballsEl));
+    for (let i = 0; i < 6; i++) {
+      await rollBall(slots[i], main[i], false);
+    }
+
+    plusEl.style.visibility = 'visible';
+    bonusLabelEl.classList.add('show');
+    const bonusSlot = createEmptySlot(bonusRowEl);
+    await rollBall(bonusSlot, bonus, true);
+
+    addHistory(main.slice().sort((a, b) => a - b), bonus);
+
+    drawBtn.disabled = false;
+    drawBtn.textContent = '번호 추첨하기';
+    drawing = false;
+  }
+
+  function addHistory(numbers, bonus) {
+    round++;
+    const row = document.createElement('div');
+    row.className = 'history-item';
+    row.innerHTML = `<span class="idx">#${round}</span>` +
+      numbers.map(n => `<span class="mini ${colorClass(n)}">${n}</span>`).join('') +
+      `<span style="color:var(--muted-soft);font-size:12px;margin:0 2px;">+</span>` +
+      `<span class="mini ${colorClass(bonus)}" style="box-shadow:0 0 0 2px var(--canvas),0 0 0 3px var(--muted-soft);">${bonus}</span>`;
+    historyEl.prepend(row);
+  }
+
+  drawBtn.addEventListener('click', playDraw);
+
+  playDraw();
+</script>
+</body>
+</html>
