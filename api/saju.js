@@ -37,6 +37,36 @@ function isValidLottoSet(mainNumbers, bonusNumber) {
   return unique.size === 6 && !unique.has(bonusNumber);
 }
 
+// Best-effort logging to Supabase — never blocks or fails the user-facing
+// response. Requires SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY (service role,
+// server-side only) set in Vercel Project Settings > Environment Variables.
+async function saveToSupabase(record) {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceKey) {
+    console.warn('Supabase not configured — skipping saju_submissions insert.');
+    return;
+  }
+
+  try {
+    const resp = await fetch(`${supabaseUrl}/rest/v1/saju_submissions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify(record),
+    });
+    if (!resp.ok) {
+      console.error('Supabase insert failed:', resp.status, await resp.text());
+    }
+  } catch (err) {
+    console.error('Supabase insert error:', err);
+  }
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'POST 요청만 지원해요.' });
@@ -99,10 +129,26 @@ module.exports = async function handler(req, res) {
       return;
     }
 
+    const sortedMainNumbers = parsed.mainNumbers.slice().sort((a, b) => a - b);
+    const summary = String(parsed.summary || '');
+    const reasoning = String(parsed.reasoning || '');
+
+    // Fire-and-forget: a Supabase outage must never break the user-facing result.
+    await saveToSupabase({
+      birth_date: birthDate,
+      birth_time: birthTime || null,
+      calendar_type: calendarType === 'lunar' ? 'lunar' : 'solar',
+      gender: gender || null,
+      summary,
+      reasoning,
+      main_numbers: sortedMainNumbers,
+      bonus_number: parsed.bonusNumber,
+    });
+
     res.status(200).json({
-      summary: String(parsed.summary || ''),
-      reasoning: String(parsed.reasoning || ''),
-      mainNumbers: parsed.mainNumbers.slice().sort((a, b) => a - b),
+      summary,
+      reasoning,
+      mainNumbers: sortedMainNumbers,
       bonusNumber: parsed.bonusNumber,
     });
   } catch (err) {
